@@ -25,11 +25,12 @@ library(ggsn)
 library(maptools)
 library(rspatial)
 library(vegan)
-library(reshape2)
+library(reshape)
 ```
 
 Load data
 And remember Git has a 100MB file size limit
+Can always use the command `git reset Head~`
 
 ```{r}
 load("Merged.RData")
@@ -53,8 +54,8 @@ rm(c(temp, temp2))
 ```{r}
 sp<-merged
 
-#i <- sapply(sp, is.factor)                    ## here change the factors to characters
-#sp[i] <- lapply(sp[i], as.character)
+i <- sapply(sp, is.factor)                    ## here change the factors to characters
+sp[i] <- lapply(sp[i], as.character)
 
 coordinates(sp) <- c("decimalLongitude", "decimalLatitude")
 proj4string(sp) <- CRS("+proj=longlat +datum=WGS84")
@@ -62,21 +63,57 @@ proj4string(sp) <- CRS("+proj=longlat +datum=WGS84")
 rrr <- as(Africa1, "Spatial")
 
 ov <- over(sp, rrr)
-#colnames(ov) <- 'name'
 head(ov)
 
 v <- cbind(merged, ov)
 table(v$ECO_NAME)
 ```
 
+Plot
+
+```{r}
+spc <- tapply(v$tax_sp_level, v$ECO_NAME, function(x)length(unique(x)))
+spc <- data.frame(ECO_NAME=names(spc), nspp = spc)
+# merge with country SpatialPolygonsDataFrame
+cn <- merge(rrr, spc, by='ECO_NAME')
+print(spplot(cn, 'nspp', col.regions=rev(terrain.colors(25))))
+```
+
+Quick look at the relation between number of collections and species diversity.
+
+```{r}
+library(MASS)
+library(ggpubr)
+a <- table(v$ECO_NAME)
+b <- as.data.frame(a)
+c <- cbind(b, spc$nspp)
+colnames(c) <- c("Ecoregions", "Number_of_records", "Number_of_species")
+ggplot(c, aes(x=Number_of_records, y=Number_of_species)) + geom_point() + geom_smooth(method = "rlm") + theme_light() + stat_regline_equation(label.x = 2, label.y = 8000,aes(label =  paste(..eq.label.., ..adj.rr.label.., sep = "~~~~")))
+```
+
+Ok so we already knew this in a sense but it shows that we need to collect more in under-explored areas! Areas with less diversity will be less collected because they are less interesting. The two outliers on the far right are the Sahelian Acacia savanna and the West Sudanian savanna.
+
+## Reshape the data
+
+Code from here: <https://www.r-bloggers.com/2012/07/r-for-ecologists-creating-a-site-x-species-matrix/>
+
 Use the reshape package
 
 ```{r}
-site.sp.quad <- cast(v, ECO_NAME ~ tax_sp_level, value = 'presence')
+v$value <- 1 ## create a value column for the cast function
+site.sp.quad <- cast(v, formula = ECO_NAME ~ tax_sp_level, value = 'value')
 site.sp.quad <- as.data.frame(site.sp.quad)
-site.sp.quad < site.sp.quad[-95,]
-matrix.1 <- as.tibble(site.sp.quad)
-matrix.1 <- matrix.1[-95,-2]
+## Remove the last row which is just NA
+site.sp.quad <- site.sp.quad[-95,]
+matrix <- site.sp.quad
+names<- matrix$ECO_NAME
+## Remove first column and turn it into rownames
+matrix <- matrix[,-1]
+rownames(matrix) <- names
+## Turn all values into presence/absence data with 0 or 1
+matrix[matrix>1] <- 1
+
+#write.csv(matrix, "Species_x_Ecoregions_Matrix.csv")
 ```
 
 Try this
