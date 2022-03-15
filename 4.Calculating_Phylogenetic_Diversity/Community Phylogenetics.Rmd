@@ -93,6 +93,7 @@ phydist <- cophenetic(tree)
 ses.mpd.result <- ses.mpd(matrix.1, phydist, null.model = "taxa.labels",
 abundance.weighted = FALSE, runs = 99)
 ses.mpd.result
+write.csv(ses.mpd.result, "ses.mpd.resuslts.csv")
 ```
 
 
@@ -100,5 +101,6 @@ ses.mpd.result
 ses.mntd.result <- ses.mntd(matrix.1, phydist, null.model = "taxa.labels",
 abundance.weighted = FALSE, runs = 99)
 ses.mntd.result
+write.csv(ses.mpd.result, "ses.mntd.resuslts.csv")
 ```
 
