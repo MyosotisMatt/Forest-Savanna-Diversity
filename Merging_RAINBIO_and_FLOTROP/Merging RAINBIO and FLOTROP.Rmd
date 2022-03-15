@@ -1,0 +1,27 @@
+---
+title: "Merging RAINBIO and FLOTROP"
+author: "Mathew Rees"
+date: "15/03/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load environment
+
+
+```{r cars}
+library(tidyverse)
+load("RAINBIO.RData")
+load("FLOTROP.RData")
+```
+
+## Merge the two
+
+```{r}
+
+```
+
+

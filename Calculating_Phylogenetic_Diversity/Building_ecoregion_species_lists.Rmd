@@ -1,0 +1,77 @@
+---
+title: "Community Phylogenetics"
+author: "Mathew Rees"
+date: "01/03/2022"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setting up the environment
+
+First I load the libraries and data 
+
+```{r message=FALSE, error=FALSE, warning=FALSE}
+library(tidyverse)
+library(ggtree)
+library(treeio)
+library(ape)
+library(picante)
+```
+
+Now the data
+
+```{r}
+tree <- read.tree("Africa.phylogeny.tre")
+matrix <- read.csv("Species_x_Ecoregions_Matrix.csv", row.names = 1, header = T)
+
+## Make sure the names match up
+names <- colnames(matrix)
+names <- names %>% gsub(pattern = "\\.", replacement = "_")
+colnames(matrix) <- names
+```
+
+Now match the two and calculate PD
+
+```{r}
+pd.result <- pd(matrix, tree, include.root = TRUE)
+pd.result
+```
+Order them
+
+```{r}
+pd.result[order(pd.result$PD, decreasing = T),]
+```
+
+Seems like these two measures might be correlated
+
+```{r}
+library(ggpmisc)
+ggplot(pd.result, aes(x=PD, y=SR)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  stat_poly_eq(formula = y~x, 
+                aes(label = paste(..eq.label.., ..rr.label.., sep = "~~~")), 
+                parse = TRUE)
+```
+
+Now look at measures of community dissimilarity
+
+```{r}
+phydist <- cophenetic(tree)
+ses.mpd.result <- ses.mpd(comm, phydist, null.model = "taxa.labels",
+abundance.weighted = FALSE, runs = 99)
+ses.mpd.result
+
+```
+
+It's giving me an error on size of vector allocation. Need to increase memory.
+
+Now try to commit from personal laptop
+
+Add folders
