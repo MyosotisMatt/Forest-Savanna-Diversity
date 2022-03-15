@@ -21,7 +21,20 @@ load("FLOTROP.RData")
 ## Merge the two
 
 ```{r}
+test <- matrix(nrow = nrow(FLOTROP), ncol = ncol(RAINBIO))
+colnames(test) <- colnames(RAINBIO)
+test <- as.data.frame(test)
 
+test$order <- FLOTROP$order
+test$family <- FLOTROP$family
+test$genus <- FLOTROP$genus
+test$tax_sp_level <- FLOTROP$species
+test$decimalLatitude <- FLOTROP$decimalLatitude
+test$decimalLongitude <- FLOTROP$decimalLongitude
+
+merged <- rbind(RAINBIO, test)
+str(merged)
 ```
 
+So now I have a dataframe with 956,720 observations, spanning 26,202 species.
 
