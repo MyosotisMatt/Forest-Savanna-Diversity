@@ -14,6 +14,8 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ## Setting up environment
 
+Load packages
+
 ```{r}
 library(tidyverse)
 library(ape)
@@ -26,7 +28,7 @@ library(V.PhyloMaker)
 Load the data
 
 ```{r}
-load(".RData")
+load("Merded.RData")
 
 ## There is an issue with families which gives me a dataframe with 50 extra rows
 sp2 <- merged %>% filter(! tax_sp_level == "")
@@ -34,14 +36,19 @@ sp2 <- sp2 %>% dplyr::select(family, genus, tax_sp_level)
 (sp3 <- sp2 %>% group_by(species = tax_sp_level, genus, family) %>% summarise(count=n()))
 ``` 
 
-We get a dataframe with 26,252 rows but only 26,202 species. Soomething is wrong
+We get a dataframe with 26,252 rows but only 26,202 species. Something is wrong.
+There must be some duplicated names, perhaps with different families.
 
 ```{r}
 ## find out which are the duplicates
 n_occur <- data.frame(table(sp3$species))
 n_occur[n_occur$Freq > 1,]
-sp3[sp3$species %in% n_occur$Var1[n_occur$Freq > 1],]
+#sp3[sp3$species %in% n_occur$Var1[n_occur$Freq > 1],]
+```
 
+Here are the culprits.
+
+```{r}
 ## remove duplicated species
 sp4 <- sp3[!duplicated(sp3$species),]
 
@@ -49,6 +56,51 @@ sp4$species.relative <- NA
 sp4$genus.relative <- sp4$genus
 sp4 <- sp4 %>% dplyr::select(!count)
 sp4 <- as.data.frame(sp4)
+str(sp4)
 ```
 
+Ok so now we have our dataframe with 26,201 observations but the species factor has 26,202 levels. Not sure how this is possible but it seems to be ok with downstream analyses.
 
+----------------------------------------------------
+
+## Check how many names overlap
+
+How many names in the merged dataset match those in V.Phylomaker?
+
+```{r}
+mega.tree <- V.PhyloMaker::GBOTB.extended
+names <- mega.tree$tip.label
+
+species_africa <- as.vector(sp4$species)
+a1<- gsub(" ", "_", species_africa, fixed = TRUE) ## we want to add an "_" to our list from RAINBIO to match the style of the list of species in this phylogeny.
+
+str(a1)
+test <- names[names %in% a1]
+str(test)
+```
+
+Out of 26,201 species, the V.Phylomaker `GBOTB.extended` tree has 6,284 so about 24%.
+
+---------------------------------------------------
+
+## Build the phylogeny
+
+V.Phylomaker can make a tree by grafting tips onto the phylogeny according to the closest relative species or genus.
+
+```{r}
+# input example species list
+i <- sapply(sp4, is.factor)                    ## here change the factors to characters
+sp4[i] <- lapply(sp4[i], as.character)
+
+example <- sp4
+
+#generate the phylogeny presented in Figure 1b
+
+rel <- bind.relative(sp.list=example, tree=GBOTB.extended, nodes=nodes.info.1)
+
+tree.b <- phylo.maker(sp.list=rel$species.list, tree=rel$phylo, nodes=rel$nodes.info, scenarios="S3")
+
+write.tree(tree.b$scenario.3, "Figure.1b.tre")
+```
+
+This is only one tree with random placement of the grafted tips. Ideally I should replicate this 100 times to get some uncertainty measures.
