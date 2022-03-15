@@ -95,7 +95,7 @@ Ok so we already knew this in a sense but it shows that we need to collect more 
 
 ## Reshape the data
 
-Code from here: <https://www.r-bloggers.com/2012/07/r-for-ecologists-creating-a-site-x-species-matrix/>
+Code from here: https://www.r-bloggers.com/2012/07/r-for-ecologists-creating-a-site-x-species-matrix/
 
 Use the reshape package
 
