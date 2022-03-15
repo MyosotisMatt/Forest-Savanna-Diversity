@@ -27,13 +27,15 @@ library(picante)
 Now the data
 
 ```{r}
-tree <- read.tree("Africa.phylogeny.tre")
-matrix <- read.csv("Species_x_Ecoregions_Matrix.csv", row.names = 1, header = T)
+## Issue with tip labels of "Africa_phylogeny.tre"
+tree <- read.tree("Africa_phylo_2.tre")
+matrix.1 <- read.csv("Species_x_Ecoregions_Matrix.csv", row.names = 1, header = T)
 
 ## Make sure the names match up
 names <- colnames(matrix)
-names <- names %>% gsub(pattern = "\\.", replacement = "_")
-colnames(matrix) <- names
+names <- names %>% gsub(pattern = "\\ ", replacement = "_")
+colnames(matrix.1) <- names
+matrix.1 <- as.matrix(matrix.1)
 ```
 
 Now match the two and calculate PD
@@ -61,18 +63,42 @@ ggplot(pd.result, aes(x=PD, y=SR)) +
                 parse = TRUE)
 ```
 
-Now look at measures of community dissimilarity
+Now look at measures of community dissimilarity. First make sure the names on the tips of the tree match the names in the species x ecoregions matrix.
 
 ```{r}
-phydist <- cophenetic(tree)
-ses.mpd.result <- ses.mpd(comm, phydist, null.model = "taxa.labels",
-abundance.weighted = FALSE, runs = 99)
-ses.mpd.result
-
+a<-tree$tip.label %>% sort()
+b<-colnames(matrix.1) %>% sort()
+identical(a,b)
 ```
 
-It's giving me an error on size of vector allocation. Need to increase memory.
+Check which names are causing an issue
 
-Now try to commit from personal laptop
+```{r}
+a[!a %in% b]
 
-Add folders
+b[!b %in% a]
+```
+
+Some weird NA is the tree and some strangely formated names in the matrix. Overall matrix names are better so I will replaces tree$tip.labels with the colnames of matrix.1
+
+```{r}
+tree$tip.label <- colnames(matrix.1)
+```
+
+Now try the ses.mpd
+
+```{r}
+memory.limit(size=50000)
+phydist <- cophenetic(tree)
+ses.mpd.result <- ses.mpd(matrix.1, phydist, null.model = "taxa.labels",
+abundance.weighted = FALSE, runs = 99)
+ses.mpd.result
+```
+
+
+```{r}
+ses.mntd.result <- ses.mntd(matrix.1, phydist, null.model = "taxa.labels",
+abundance.weighted = FALSE, runs = 99)
+ses.mntd.result
+```
+

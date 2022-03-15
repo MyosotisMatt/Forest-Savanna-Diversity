@@ -112,7 +112,7 @@ rel <- bind.relative(sp.list=example, tree=GBOTB.extended, nodes=nodes.info.1)
 tree.b <- phylo.maker(sp.list=rel$species.list, tree=rel$phylo, nodes=rel$nodes.info, scenarios="S3")
 str(tree.b)
 
-#write.tree(tree.b$scenario.3, "Africa.phylogeny.tre")
+write.tree(tree.b$scenario.3, "Africa.phylogeny.tre")
 ```
 
 This is only one tree with random placement of the grafted tips. Ideally I should replicate this 100 times to get some uncertainty measures.
