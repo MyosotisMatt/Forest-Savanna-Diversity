@@ -1,0 +1,54 @@
+---
+title: "Building phylogeny for Africa"
+author: "Mathew Rees"
+date: "15/03/2022"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setting up environment
+
+```{r}
+library(tidyverse)
+library(ape)
+library(ggtree)
+library(treeio)
+library(tidytree)
+library(V.PhyloMaker)
+```
+
+Load the data
+
+```{r}
+load(".RData")
+
+## There is an issue with families which gives me a dataframe with 50 extra rows
+sp2 <- merged %>% filter(! tax_sp_level == "")
+sp2 <- sp2 %>% dplyr::select(family, genus, tax_sp_level)
+(sp3 <- sp2 %>% group_by(species = tax_sp_level, genus, family) %>% summarise(count=n()))
+``` 
+
+We get a dataframe with 26,252 rows but only 26,202 species. Soomething is wrong
+
+```{r}
+## find out which are the duplicates
+n_occur <- data.frame(table(sp3$species))
+n_occur[n_occur$Freq > 1,]
+sp3[sp3$species %in% n_occur$Var1[n_occur$Freq > 1],]
+
+## remove duplicated species
+sp4 <- sp3[!duplicated(sp3$species),]
+
+sp4$species.relative <- NA
+sp4$genus.relative <- sp4$genus
+sp4 <- sp4 %>% dplyr::select(!count)
+sp4 <- as.data.frame(sp4)
+```
+
+
