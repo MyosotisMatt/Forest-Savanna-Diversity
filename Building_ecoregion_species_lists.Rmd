@@ -73,3 +73,5 @@ ses.mpd.result
 It's giving me an error on size of vector allocation. Need to increase memory.
 
 Now try to commit from personal laptop
+
+Add folders
