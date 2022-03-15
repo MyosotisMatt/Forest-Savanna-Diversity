@@ -69,4 +69,4 @@ abundance.weighted = FALSE, runs = 99)
 ses.mpd.result
 
 ```
-
+It's giving me an error on size of vector alocation. Need to increase memory.
