@@ -42,6 +42,7 @@ Now match the two and calculate PD
 pd.result <- pd(matrix, tree, include.root = TRUE)
 pd.result
 ```
+
 Order them
 
 ```{r}

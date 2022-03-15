@@ -28,10 +28,13 @@ library(V.PhyloMaker)
 Load the data
 
 ```{r}
-load("Merded.RData")
+load("Merged.RData")
 
 ## There is an issue with families which gives me a dataframe with 50 extra rows
+
+## Filter out collections with only genus name
 sp2 <- merged %>% filter(! tax_sp_level == "")
+## Select only variables of interest
 sp2 <- sp2 %>% dplyr::select(family, genus, tax_sp_level)
 (sp3 <- sp2 %>% group_by(species = tax_sp_level, genus, family) %>% summarise(count=n()))
 ``` 
@@ -77,9 +80,18 @@ a1<- gsub(" ", "_", species_africa, fixed = TRUE) ## we want to add an "_" to ou
 str(a1)
 test <- names[names %in% a1]
 str(test)
+
 ```
 
 Out of 26,201 species, the V.Phylomaker `GBOTB.extended` tree has 6,284 so about 24%.
+
+Note: after having ran the tree once, I get the following error message:
+
+[1] "Taxonomic classification not consistent between sp.list and tree."
+[1] "Note: 3 taxa fail to be binded to the tree,"
+[1] "Hydnora_abyssinica"  "Hydnora_sinandevu"   "Jodrellia_fistulosa"
+
+I will have to manually change some names. I've done this outside of R for practical reasons.
 
 ---------------------------------------------------
 
@@ -89,18 +101,18 @@ V.Phylomaker can make a tree by grafting tips onto the phylogeny according to th
 
 ```{r}
 # input example species list
-i <- sapply(sp4, is.factor)                    ## here change the factors to characters
-sp4[i] <- lapply(sp4[i], as.character)
-
-example <- sp4
+example <- read.csv("V.Phylomaker_species_list_ecoregions.csv")
+example <- example[!duplicated(example$species),]
+str(example)
 
 #generate the phylogeny presented in Figure 1b
 
 rel <- bind.relative(sp.list=example, tree=GBOTB.extended, nodes=nodes.info.1)
 
 tree.b <- phylo.maker(sp.list=rel$species.list, tree=rel$phylo, nodes=rel$nodes.info, scenarios="S3")
+str(tree.b)
 
-write.tree(tree.b$scenario.3, "Figure.1b.tre")
+#write.tree(tree.b$scenario.3, "Africa.phylogeny.tre")
 ```
 
 This is only one tree with random placement of the grafted tips. Ideally I should replicate this 100 times to get some uncertainty measures.
