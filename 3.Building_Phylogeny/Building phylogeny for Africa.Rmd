@@ -28,7 +28,7 @@ library(V.PhyloMaker)
 Load the data
 
 ```{r}
-load("Merged.RData")
+load("../2.Species_x_Site_Matrix/Merged.RData")
 
 ## There is an issue with families which gives me a dataframe with 50 extra rows
 

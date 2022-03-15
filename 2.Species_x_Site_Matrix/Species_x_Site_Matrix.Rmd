@@ -1,0 +1,82 @@
+---
+title: "Species x Site Matrix"
+author: "Mathew Rees"
+date: "15/03/2022"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Load the environment
+
+```{r message=FALSE, error=FALSE, warning=FALSE}
+library(tidyverse)
+library(sp)
+library(sf)
+library(rgdal)
+library(raster)
+library(splancs)
+library(ggsn)
+library(maptools)
+library(rspatial)
+library(vegan)
+library(reshape2)
+```
+
+Load data
+And remember Git has a 100MB file size limit
+
+```{r}
+load("Merged.RData")
+
+temp <- tempfile()
+temp2 <- tempfile()
+
+## Download ecoregions shapefile
+#download.file("https://storage.googleapis.com/teow2016/Ecoregions2017.zip", temp)
+#unzip(zipfile=temp, exdir = temp2)
+#your_SHP_file<-list.files(temp2, pattern = ".shp$",full.names=TRUE)
+
+##Read in the sahepfile
+ecoregions <- st_read(your_SHP_file)
+Africa1 <- ecoregions %>% filter(REALM == "Afrotropic")
+
+rm(c(temp, temp2))
+```
+
+
+```{r}
+sp<-merged
+
+#i <- sapply(sp, is.factor)                    ## here change the factors to characters
+#sp[i] <- lapply(sp[i], as.character)
+
+coordinates(sp) <- c("decimalLongitude", "decimalLatitude")
+proj4string(sp) <- CRS("+proj=longlat +datum=WGS84")
+
+rrr <- as(Africa1, "Spatial")
+
+ov <- over(sp, rrr)
+#colnames(ov) <- 'name'
+head(ov)
+
+v <- cbind(merged, ov)
+table(v$ECO_NAME)
+```
+
+Use the reshape package
+
+```{r}
+site.sp.quad <- cast(v, ECO_NAME ~ tax_sp_level, value = 'presence')
+site.sp.quad <- as.data.frame(site.sp.quad)
+site.sp.quad < site.sp.quad[-95,]
+matrix.1 <- as.tibble(site.sp.quad)
+matrix.1 <- matrix.1[-95,-2]
+```
+
+Try this
