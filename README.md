@@ -2,4 +2,4 @@
 
 # Scripts
 
-This repository hosts scripts to reproduce the analyses of Rees, M., Godlee, J.L., Harris, D.J., Ryan, C.M. & Dexter, K.G. (2023) Testing White’s Floristic Impoverishment Hypothesis in the Forest-Savanna Transition Zones of Africa. Diversity. 15 (7), 833. doi:10.3390/d15070833.
+This repository hosts scripts to reproduce the analyses of [Rees, M., Godlee, J.L., Harris, D.J., Ryan, C.M. & Dexter, K.G. (2023) Testing White’s Floristic Impoverishment Hypothesis in the Forest-Savanna Transition Zones of Africa. Diversity. 15 (7), 833. doi:10.3390/d15070833](https://www.mdpi.com/1424-2818/15/7/833).
